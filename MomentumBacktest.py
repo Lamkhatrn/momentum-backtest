@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import yfinance as yf
+import matplotlib.pyplot as plt
 
 # Paramètres
 # 10 grandes valeurs du CAC 40
@@ -23,7 +24,7 @@ FIN = "2026-01-01"
 MOMENTUM = 252          # fenêtre momentum = 12 mois (252 jours de bourse)
 TOP_N = 3            # on achète les 3 meilleurs
 
-# 1. Téléchargement des données
+# Téléchargement des données
 print("Téléchargement des données...")
 data = yf.download(TICKERS, start=DEBUT, end=FIN, auto_adjust=True)["Close"]
 benchmark = yf.download(BENCHMARK, start=DEBUT, end=FIN, auto_adjust=True)["Close"]
@@ -35,7 +36,7 @@ print(f"\nNombre d'actions : {data.shape[1]}")
 print(f"Période : {data.index[0].date()} -> {data.index[-1].date()}")
 print(f"Nombre de jours : {len(data)}")
 
-# 2. Calcul du signal momentum
+# Calcul du signal momentum
 # Performance de chaque action sur les 12 derniers mois
 momentum_signal = data.pct_change(MOMENTUM)
 
@@ -46,7 +47,7 @@ print("\nClassement momentum au 31/12/2025 :")
 print(momentum_signal.loc["2025-12-31"].sort_values(ascending=False))
 
 
-# 3. Construction des positions
+# Construction des positions
 # On décale le signal d'un jour pour éviter le biais look-ahead
 signal_decale = momentum_signal.shift(1)
 
@@ -69,7 +70,7 @@ def construire_positions(row):
 # résultat : un tableau avec les poids de chaque action pour chaque jour
 positions = signal_decale.apply(construire_positions, axis=1)
 
-# 4. Calcul des rendements
+# Calcul des rendements
 # Rendements journaliers réels de chaque action
 rendements_actions = data.pct_change()
 
@@ -90,10 +91,10 @@ print(positions.tail())
 print(f"\nNombre de jours avec positions actives : {(positions.sum(axis=1) > 0).sum()}")
 
 
-# 5. Métriques de performance
-def calculer_metriques(rendements, nom):
+# Indices de performance
+def calculer_indices(rendements, nom):
     """
-    Calcule les métriques clés d'une stratégie à partir de ses rendements journaliers.
+    Calcule les indices clés d'une stratégie à partir de ses rendements journaliers.
     - Rendement annualisé : performance moyenne sur 1 an
     - Volatilité annualisée : instabilité des rendements sur 1 an
     - Sharpe : rendement obtenu par unité de risque (plus c'est élevé, mieux c'est)
@@ -129,5 +130,5 @@ def calculer_metriques(rendements, nom):
     }
 
 # Calcul pour la stratégie et le benchmark
-metriques_strategie = calculer_metriques(rendements_strategie, "Stratégie Momentum")
-metriques_benchmark = calculer_metriques(rendements_benchmark.squeeze(), "Benchmark CAC 40")
+indices_strategie = calculer_indices(rendements_strategie, "Stratégie Momentum")
+indices_benchmark = calculer_indices(rendements_benchmark.squeeze(), "Benchmark CAC 40")
