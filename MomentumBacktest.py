@@ -88,3 +88,46 @@ rendements_strategie = rendements_strategie.reindex(rendements_benchmark.index)
 print("Aperçu des positions (5 dernières dates) :")
 print(positions.tail())
 print(f"\nNombre de jours avec positions actives : {(positions.sum(axis=1) > 0).sum()}")
+
+
+# 5. Métriques de performance
+def calculer_metriques(rendements, nom):
+    """
+    Calcule les métriques clés d'une stratégie à partir de ses rendements journaliers.
+    - Rendement annualisé : performance moyenne sur 1 an
+    - Volatilité annualisée : instabilité des rendements sur 1 an
+    - Sharpe : rendement obtenu par unité de risque (plus c'est élevé, mieux c'est)
+    - Drawdown max : pire perte depuis un pic (mesure le risque de ruine)
+    """
+    # 252 jours de bourse par an = facteur d'annualisation
+    rendement_annuel = rendements.mean() * 252
+    volatilite_annuelle = rendements.std() * np.sqrt(252)
+
+    # Sharpe = rendement excédentaire / volatilité
+    # On soustrait le taux sans risque (3% ici)
+    taux_sans_risque = 0.03
+    sharpe = (rendement_annuel - taux_sans_risque) / volatilite_annuelle
+
+    # Drawdown max : on calcule la valeur du portefeuille jour par jour, puis on mesure la pire chute depuis un sommet
+    valeur_portefeuille = (1 + rendements).cumprod()
+    pic = valeur_portefeuille.cummax()
+    drawdown = (valeur_portefeuille - pic) / pic
+    drawdown_max = drawdown.min()
+
+    print(f"\n{nom}")
+    print(f"Rendement annualisé  : {rendement_annuel:.2%}")
+    print(f"Volatilité annualisée : {volatilite_annuelle:.2%}")
+    print(f"Ratio de Sharpe      : {sharpe:.2f}")
+    print(f"Drawdown maximum     : {drawdown_max:.2%}")
+
+    return {
+        "rendement": rendement_annuel,
+        "volatilite": volatilite_annuelle,
+        "sharpe": sharpe,
+        "drawdown_max": drawdown_max,
+        "valeur": valeur_portefeuille
+    }
+
+# Calcul pour la stratégie et le benchmark
+metriques_strategie = calculer_metriques(rendements_strategie, "Stratégie Momentum")
+metriques_benchmark = calculer_metriques(rendements_benchmark.squeeze(), "Benchmark CAC 40")
