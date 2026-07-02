@@ -132,3 +132,80 @@ def calculer_indices(rendements, nom):
 # Calcul pour la stratégie et le benchmark
 indices_strategie = calculer_indices(rendements_strategie, "Stratégie Momentum")
 indices_benchmark = calculer_indices(rendements_benchmark.squeeze(), "Benchmark CAC 40")
+
+
+# Visualisation
+
+fig, axes = plt.subplots(2, 2, figsize=(14, 9))
+fig.suptitle("Backtest Stratégie Momentum — CAC 40 (2020-2025)",
+             fontsize=14, fontweight="bold")
+
+# Graphique 1 : Performance cumulée stratégie vs benchmark
+ax1 = axes[0, 0]
+indices_strategie["valeur"].plot(ax=ax1, label="Stratégie Momentum",
+                                    color="#4C72B0", linewidth=2)
+indices_benchmark["valeur"].plot(ax=ax1, label="CAC 40",
+                                    color="#E74C3C", linewidth=2)
+ax1.set_title("Performance cumulée (1€ investi)")
+ax1.set_ylabel("Valeur du portefeuille (€)")
+ax1.legend()
+ax1.axhline(1, color="gray", linestyle="--", linewidth=0.8)
+
+# Graphique 2 : Drawdown stratégie vs benchmark
+ax2 = axes[0, 1]
+valeur_s = indices_strategie["valeur"]
+valeur_b = indices_benchmark["valeur"]
+
+drawdown_s = (valeur_s - valeur_s.cummax()) / valeur_s.cummax()
+drawdown_b = (valeur_b - valeur_b.cummax()) / valeur_b.cummax()
+
+drawdown_s.plot(ax=ax2, label="Stratégie Momentum", color="#4C72B0", linewidth=1.5)
+drawdown_b.plot(ax=ax2, label="CAC 40", color="#E74C3C", linewidth=1.5)
+ax2.fill_between(drawdown_s.index, drawdown_s, 0, alpha=0.2, color="#4C72B0")
+ax2.set_title("Drawdown (chute depuis un pic)")
+ax2.set_ylabel("Drawdown (%)")
+ax2.legend()
+
+# Graphique 3 : Distribution des rendements journaliers
+ax3 = axes[1, 0]
+rendements_strategie.hist(ax=ax3, bins=80, color="#4C72B0",
+                           alpha=0.7, edgecolor="none", label="Stratégie")
+rendements_benchmark.squeeze().hist(ax=ax3, bins=80, color="#E74C3C",
+                                     alpha=0.5, edgecolor="none", label="CAC 40")
+ax3.axvline(0, color="black", linewidth=1, linestyle="--")
+ax3.set_title("Distribution des rendements journaliers")
+ax3.set_xlabel("Rendement journalier")
+ax3.set_ylabel("Fréquence")
+ax3.legend()
+
+# Graphique 4 : Tableau récapitulatif des indices
+ax4 = axes[1, 1]
+ax4.axis("off")
+
+indices_table = [
+    ["Indice", "Momentum", "CAC 40"],
+    ["Rendement annualisé",
+     f"{indices_strategie['rendement']:.2%}",
+     f"{indices_benchmark['rendement']:.2%}"],
+    ["Volatilité annualisée",
+     f"{indices_strategie['volatilite']:.2%}",
+     f"{indices_benchmark['volatilite']:.2%}"],
+    ["Ratio de Sharpe",
+     f"{indices_strategie['sharpe']:.2f}",
+     f"{indices_benchmark['sharpe']:.2f}"],
+    ["Drawdown maximum",
+     f"{indices_strategie['drawdown_max']:.2%}",
+     f"{indices_benchmark['drawdown_max']:.2%}"],
+]
+
+table = ax4.table(cellText=indices_table[1:],
+                  colLabels=indices_table[0],
+                  loc="center", cellLoc="center")
+table.auto_set_font_size(False)
+table.set_fontsize(11)
+table.scale(1.3, 2.2)
+ax4.set_title("Récapitulatif des performances")
+
+plt.tight_layout()
+plt.savefig("momentum_backtest.png", dpi=150, bbox_inches="tight")
+print("\nGraphique sauvegardé : momentum_backtest.png")
