@@ -1,4 +1,4 @@
-# Momentum Strategy Backtest - CAC 40 (2020-2025)
+# Momentum Strategy Backtest / CAC 40 (2020-2025)
 
 Backtest d'une stratégie momentum sur 10 valeurs du CAC 40, comparée au benchmark CAC 40 sur 6 ans de données réelles.
 
