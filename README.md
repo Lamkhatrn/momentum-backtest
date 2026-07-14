@@ -27,7 +27,7 @@ Backtest d'une stratégie momentum sur 10 valeurs du CAC 40, comparée au benchm
 
 ## Stack technique
 
-Python · NumPy · Pandas · Matplotlib · yfinance
+Python, NumPy, Pandas, Matplotlib, yfinance
 
 ## Lancer le projet
 
