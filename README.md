@@ -40,8 +40,6 @@ python MomentumBacktest.py
 
 - Univers restreint à 10 valeurs : un univers plus large (S&P 500) produirait
   un ratio de Sharpe plus élevé grâce à une meilleure diversification
-- Pas de validation out-of-sample : les résultats pourraient refléter
-  de l'overfitting sur la période 2020-2025
 - La stratégie est inactive pendant les 252 premiers jours (fenêtre momentum
   insuffisante) : elle évite donc le crash COVID de mars 2020 par défaut
 - Corrélation élevée entre les 3 banques sélectionnées fin 2025 : concentration sectorielle non diversifiée
